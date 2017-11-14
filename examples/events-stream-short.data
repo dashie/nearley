@@ -1,0 +1,14 @@
+   {"id": 0,
+ "ts":1510605355729,"type": "login",
+ "user":  "David Olah" }, 
+ {"id": 1,  "ts":  1510605355729,
+  "type": "add_to_cart", "user":  "Deneen Rosch"
+},
+ {"id":2, "ts":  1510605355730,"type": "add_to_cart",
+ "user":  "David Olah"
+},  {"id":3,
+  "ts": 1510605355730, "type":"login",
+ "user":  "Lorretta Vassel"
+ },  {"id":4, "ts": 1510605355731,
+  "type": "add_to_cart", "user": "Rickey Towery"
+}  

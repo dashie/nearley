@@ -8,6 +8,7 @@ var fs = require('fs');
 var nearley = require('../lib/nearley.js');
 var nomnom = require('nomnom');
 var StreamWrapper = require('../lib/stream.js');
+var readline = require('readline');
 
 var opts = nomnom
     .script('nearley-test')
@@ -53,35 +54,38 @@ var parser = new nearley.Parser(grammar, {
     keepHistory: true,
 });
 
-var writeTable = function (writeStream, parser) {
+var writeTable = function(writeStream, parser) {
     writeStream.write("Table length: " + parser.table.length + "\n");
     writeStream.write("Number of parses: " + parser.results.length + "\n");
     writeStream.write("Parse Charts");
-    parser.table.forEach(function (column, index) {
+    parser.table.forEach(function(column, index) {
         writeStream.write("\nChart: " + index++ + "\n");
         var stateNumber = 0;
-        column.states.forEach(function (state, stateIndex) {
+        column.states.forEach(function(state, stateIndex) {
             writeStream.write(stateIndex + ": " + state.toString() + "\n");
         })
     })
     writeStream.write("\n\nParse results: \n");
 }
 
-var writeResults = function (writeStream, parser) {
-    writeStream.write(require('util').inspect(parser.results, {colors: !opts.quiet, depth: null}));
+var writeResults = function(writeStream, parser) {
+    writeStream.write(require('util').inspect(parser.results, { colors: !opts.quiet, depth: null }));
     writeStream.write("\n");
 }
 
 if (typeof(opts.input) === "undefined") {
-    process.stdin
-        .pipe(new StreamWrapper(parser))
-        .on('finish', function() {
-            if (!opts.quiet) writeTable(output, parser);
-            writeResults(output, parser);
-        });
+    var rl = readline.createInterface({
+        input: process.stdin
+    });
+    rl.on('line', (line) => {
+        parser.feed(line);
+    });
+    rl.on('close', (line) => {
+        if (!opts.quiet) writeTable(output, parser);
+        writeResults(output, parser);
+    });
 } else {
     parser.feed(opts.input);
     if (!opts.quiet) writeTable(output, parser);
     writeResults(output, parser);
 }
-

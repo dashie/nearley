@@ -1,9 +1,8 @@
-
 const fs = require('fs');
 const expect = require('expect');
 
 const nearley = require('../lib/nearley');
-const {compile, parse} = require('./_shared');
+const { compile, parse } = require('./_shared');
 
 function read(filename) {
     return fs.readFileSync(filename, 'utf-8');
@@ -18,18 +17,18 @@ describe('Parser: API', function() {
     `)
 
     it('shows line number in errors', function() {
-      expect(() => parse(testGrammar, 'abc\n12!')).toThrow(
-        'invalid syntax at line 2 col 3:\n' +
-        '\n' +
-        '  12!\n' +
-        '    ^'
-      )
+        expect(() => parse(testGrammar, 'abc\n12!')).toThrow(
+            'invalid syntax at line 2 col 3:\n' +
+            '\n' +
+            '  12!\n' +
+            '    ^'
+        )
     })
 
     it('shows token index in errors', function() {
-      expect(() => parse(testGrammar, ['1', '2', '!'])).toThrow(
-        'invalid syntax at index 2'
-      )
+        expect(() => parse(testGrammar, ['1', '2', '!'])).toThrow(
+            'invalid syntax at index 2'
+        )
     })
 
     var tosh = compile(read("examples/tosh.ne"));
@@ -61,7 +60,9 @@ describe('Parser: API', function() {
         expect(p.current).toBe(11)
         expect(p.table.length).toBe(12)
 
-        expect(p.results).toEqual([['say:', 'hello']]);
+        expect(p.results).toEqual([
+            ['say:', 'hello']
+        ]);
     });
 
     it("won't rewind without `keepHistory` option", function() {
@@ -70,32 +71,32 @@ describe('Parser: API', function() {
     })
 
     it('restores line numbers', function() {
-      let p = new nearley.Parser(testGrammar);
-      p.feed('abc\n')
-      expect(p.save().lexerState.line).toBe(2)
-      p.feed('123\n')
-      var col = p.save();
-      expect(col.lexerState.line).toBe(3)
-      p.feed('q')
-      p.restore(col);
-      expect(p.lexer.line).toBe(3)
-      p.feed('z')
+        let p = new nearley.Parser(testGrammar);
+        p.feed('abc\n')
+        expect(p.save().lexerState.line).toBe(2)
+        p.feed('123\n')
+        var col = p.save();
+        expect(col.lexerState.line).toBe(3)
+        p.feed('q')
+        p.restore(col);
+        expect(p.lexer.line).toBe(3)
+        p.feed('z')
     });
 
     it('restores column number', function() {
-      let p = new nearley.Parser(testGrammar);
-      p.feed('foo\nbar')
-      var col = p.save();
-      expect(col.lexerState.line).toBe(2)
-      expect(col.lexerState.col).toBe(3)
-      p.feed('123');
-      expect(p.lexerState.col).toBe(6)
+        let p = new nearley.Parser(testGrammar);
+        p.feed('foo\nbar')
+        var col = p.save();
+        expect(col.lexerState.line).toBe(2)
+        expect(col.lexerState.col).toBe(3)
+        p.feed('123');
+        expect(p.lexerState.col).toBe(6)
 
-      p.restore(col);
-      expect(p.lexerState.line).toBe(2)
-      expect(p.lexerState.col).toBe(3)
-      p.feed('456')
-      expect(p.lexerState.col).toBe(6)
+        p.restore(col);
+        expect(p.lexerState.line).toBe(2)
+        expect(p.lexerState.col).toBe(3)
+        p.feed('456')
+        expect(p.lexerState.col).toBe(6)
     });
 
     // TODO: moo save/restore
@@ -107,7 +108,19 @@ describe('Parser: examples', () => {
     it('nullable whitespace bug', function() {
         var wsb = compile(read("test/grammars/whitespace.ne"));
         expect(parse(wsb, "(x)")).toEqual(
-            [ [ [ [ '(', null, [ [ [ [ 'x' ] ] ] ], null, ')' ] ] ] ]);
+            [
+                [
+                    [
+                        ['(', null, [
+                            [
+                                [
+                                    ['x']
+                                ]
+                            ]
+                        ], null, ')']
+                    ]
+                ]
+            ]);
     });
 
     const parentheses = compile(read("examples/parentheses.ne"));
@@ -141,7 +154,11 @@ describe('Parser: examples', () => {
 
     it('tokens', function() {
         var tokc = compile(read("examples/token.ne"));
-        expect(parse(tokc, [123, 456, " ", 789])).toEqual([ [123, [ [ 456, " ", 789 ] ]] ]);
+        expect(parse(tokc, [123, 456, " ", 789])).toEqual([
+            [123, [
+                [456, " ", 789]
+            ]]
+        ]);
     });
 
     const json = compile(read("examples/json.ne"));
@@ -156,8 +173,15 @@ describe('Parser: examples', () => {
     it('tosh', () => {
         var tosh = compile(read("examples/tosh.ne"));
         expect(parse(tosh, "set foo to 2 * e^ of ( foo * -0.05 + 0.5) * (1 - e ^ of (foo * -0.05 + 0.5))"))
-            .toEqual([["setVar:to:","foo",["*",["*",2,["computeFunction:of:","e ^",["+",["*",["readVariable","foo"],-0.05],0.5]]],["-",1,["computeFunction:of:","e ^",["+",["*",["readVariable","foo"],-0.05],0.5]]]]]]);
-    })
+            .toEqual([
+                ["setVar:to:", "foo", ["*", ["*", 2, ["computeFunction:of:", "e ^", ["+", ["*", ["readVariable", "foo"], -0.05], 0.5]]],
+                    ["-", 1, ["computeFunction:of:", "e ^", ["+", ["*", ["readVariable", "foo"], -0.05], 0.5]]]
+                ]]
+            ]);
+    });
 
+    const stream = compile(read("examples/events-stream.ne"));
+    it('stream', () => {
+
+    });
 })
-
